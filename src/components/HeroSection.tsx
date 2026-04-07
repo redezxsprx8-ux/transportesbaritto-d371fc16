@@ -36,7 +36,7 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <a
-              href="tel:+34922000000"
+              href="tel:+34922619077"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-8 py-4 font-semibold text-sm transition-all duration-300 bg-secondary text-secondary-foreground hover:brightness-110 shadow-lg"
             >
               <Phone className="w-4 h-4" />
