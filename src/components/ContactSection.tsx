@@ -75,7 +75,7 @@ const ContactSection = () => {
           <div className="rounded-xl overflow-hidden border border-border shadow-[var(--shadow-card)] h-[400px]">
             <iframe
               title="Ubicación de Transportes Insulares Baritto"
-              src="https://maps.google.com/maps?q=Pol%C3%ADgono+Industrial+El+Mayorazgo+Carretera+Hoya+Fria+5+38110+Santa+Cruz+de+Tenerife+Spain&t=&z=16&ie=UTF8&iwloc=&output=embed"
+              src="https://maps.google.com/maps?q=Transportes+Insulares+Baritto+Santa+Cruz+de+Tenerife&t=&z=17&ie=UTF8&iwloc=&output=embed"
               className="w-full h-full"
               style={{ border: 0 }}
               allowFullScreen
