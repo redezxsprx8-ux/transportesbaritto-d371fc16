@@ -31,7 +31,7 @@ const Navbar = () => {
             </a>
           ))}
           <a
-            href="tel:+34922000000"
+            href="tel:+34922619077"
             className="rounded-lg bg-secondary text-secondary-foreground px-5 py-2 text-sm font-semibold hover:brightness-110 transition-all"
           >
             Llamar

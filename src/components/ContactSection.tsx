@@ -26,7 +26,9 @@ const ContactSection = () => {
               <div>
                 <h3 className="font-heading font-bold text-foreground">Dirección</h3>
                 <p className="text-muted-foreground text-sm mt-1">
-                  Santa Cruz de Tenerife, Islas Canarias
+                  Polígono Industrial El Mayorazgo<br />
+                  Carretera Hoya Fría nº 5 (Bajo)<br />
+                  38110 Santa Cruz de Tenerife, España
                 </p>
               </div>
             </div>
@@ -37,8 +39,8 @@ const ContactSection = () => {
               </div>
               <div>
                 <h3 className="font-heading font-bold text-foreground">Teléfono</h3>
-                <a href="tel:+34922000000" className="text-accent hover:underline text-sm mt-1 block">
-                  +34 922 000 000
+                <a href="tel:+34922619077" className="text-accent hover:underline text-sm mt-1 block">
+                  922 61 90 77
                 </a>
               </div>
             </div>
@@ -49,8 +51,8 @@ const ContactSection = () => {
               </div>
               <div>
                 <h3 className="font-heading font-bold text-foreground">Email</h3>
-                <a href="mailto:info@baritto.es" className="text-accent hover:underline text-sm mt-1 block">
-                  info@baritto.es
+                <a href="mailto:admin.transportesbaritto@gmail.com" className="text-accent hover:underline text-sm mt-1 block">
+                  admin.transportesbaritto@gmail.com
                 </a>
               </div>
             </div>
