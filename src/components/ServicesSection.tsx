@@ -28,8 +28,8 @@ const services = [
   },
   {
     icon: BarChart3,
-    title: "Seguimiento en tiempo real",
-    description: "Controla el estado de tus envíos en todo momento.",
+    title: "Mudanzas interinsulares",
+    description: "Trasladamos tus pertenencias entre islas con cuidado y profesionalidad.",
   },
 ];
 
