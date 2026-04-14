@@ -1,4 +1,5 @@
 import { Ship, Phone, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
 import heroImage from "@/assets/hero-ship.jpg";
 
 const HeroSection = () => {
@@ -19,22 +20,42 @@ const HeroSection = () => {
       {/* Content */}
       <div className="container relative z-10 py-20">
         <div className="max-w-2xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-2 text-secondary font-medium text-sm backdrop-blur-sm border border-secondary/30">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-2 text-secondary font-medium text-sm backdrop-blur-sm border border-secondary/30"
+          >
             <Ship className="w-4 h-4" />
             Transporte de mercancías interinsular
-          </div>
+          </motion.div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground leading-tight tracking-tight">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground leading-tight tracking-tight"
+          >
             Transportes Insulares{" "}
             <span className="text-secondary">Baritto</span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-lg md:text-xl text-primary-foreground/80 max-w-lg font-body">
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="text-lg md:text-xl text-primary-foreground/80 max-w-lg font-body"
+          >
             Tu socio de confianza en el transporte de mercancías en las Islas
             Canarias. Rapidez, eficiencia y seguridad en cada envío.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="flex flex-col sm:flex-row gap-4 pt-4"
+          >
             <a
               href="tel:+34922619077"
               className="inline-flex items-center justify-center gap-2 rounded-lg px-8 py-4 font-semibold text-sm transition-all duration-300 bg-secondary text-secondary-foreground hover:brightness-110 shadow-lg"
@@ -49,10 +70,15 @@ const HeroSection = () => {
               <MapPin className="w-4 h-4" />
               Cómo llegar
             </a>
-          </div>
+          </motion.div>
 
           {/* Rating Badge */}
-          <div className="flex items-center gap-3 pt-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex items-center gap-3 pt-4"
+          >
             <div className="flex">
               {[1, 2, 3, 4].map((i) => (
                 <svg key={i} className="w-5 h-5 text-secondary fill-current" viewBox="0 0 20 20">
@@ -76,7 +102,7 @@ const HeroSection = () => {
             </div>
             <span className="text-primary-foreground font-bold text-lg">4,1</span>
             <span className="text-primary-foreground/60 text-sm">· 125 reseñas en Google</span>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

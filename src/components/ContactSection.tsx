@@ -1,10 +1,17 @@
 import { Phone, MapPin, Clock, Mail } from "lucide-react";
+import { motion } from "framer-motion";
 
 const ContactSection = () => {
   return (
     <section id="contacto" className="py-24 bg-background">
       <div className="container">
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-2xl mx-auto mb-16"
+        >
           <span className="text-sm font-semibold text-accent uppercase tracking-widest">
             Contacto
           </span>
@@ -14,11 +21,17 @@ const ContactSection = () => {
           <p className="text-muted-foreground mt-4">
             Contáctanos y te ofrecemos presupuesto sin compromiso.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
           {/* Contact Info */}
-          <div className="space-y-8">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="space-y-8"
+          >
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
                 <MapPin className="w-6 h-6 text-accent" />
@@ -69,10 +82,16 @@ const ContactSection = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Map Embed */}
-          <div className="rounded-xl overflow-hidden border border-border shadow-[var(--shadow-card)] h-[400px]">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
+            className="rounded-xl overflow-hidden border border-border shadow-[var(--shadow-card)] h-[400px]"
+          >
             <iframe
               title="Ubicación de Transportes Insulares Baritto"
               src="https://maps.google.com/maps?q=Transportes+Insulares+Baritto+Santa+Cruz+de+Tenerife&t=&z=17&ie=UTF8&iwloc=&output=embed"
@@ -82,7 +101,7 @@ const ContactSection = () => {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
