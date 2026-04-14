@@ -21,9 +21,9 @@ const HeroSection = () => {
       <div className="container relative z-10 py-20">
         <div className="max-w-2xl space-y-6">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
             className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-2 text-secondary font-medium text-sm backdrop-blur-sm border border-secondary/30"
           >
             <Ship className="w-4 h-4" />
@@ -31,9 +31,9 @@ const HeroSection = () => {
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: "easeOut" }}
             className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-primary-foreground leading-tight tracking-tight"
           >
             Transportes Insulares{" "}
@@ -41,9 +41,9 @@ const HeroSection = () => {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
             className="text-lg md:text-xl text-primary-foreground/80 max-w-lg font-body"
           >
             Tu socio de confianza en el transporte de mercancías en las Islas
@@ -51,9 +51,9 @@ const HeroSection = () => {
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.45 }}
+            transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
             className="flex flex-col sm:flex-row gap-4 pt-4"
           >
             <a
