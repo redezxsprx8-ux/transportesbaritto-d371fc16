@@ -39,10 +39,10 @@ const ServicesSection = () => {
     <section id="servicios" className="py-24 bg-background">
       <div className="container">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="text-sm font-semibold text-accent uppercase tracking-widest">
@@ -60,10 +60,10 @@ const ServicesSection = () => {
           {services.map((service, i) => (
             <motion.div
               key={service.title}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
               className="group rounded-xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-[var(--shadow-elevated)] hover:-translate-y-1"
             >
               <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-5 group-hover:bg-accent/20 transition-colors">

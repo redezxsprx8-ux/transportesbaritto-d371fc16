@@ -39,10 +39,10 @@ const ReviewsSection = () => {
     <section id="resenas" className="py-24 bg-muted/50">
       <div className="container">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="text-sm font-semibold text-accent uppercase tracking-widest">
@@ -69,10 +69,10 @@ const ReviewsSection = () => {
           {reviews.map((review, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease: "easeOut" }}
               className="rounded-xl bg-card border border-border p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-all duration-300"
             >
               <Quote className="w-8 h-8 text-secondary/30 mb-4" />

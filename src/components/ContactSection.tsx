@@ -6,10 +6,10 @@ const ContactSection = () => {
     <section id="contacto" className="py-24 bg-background">
       <div className="container">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <span className="text-sm font-semibold text-accent uppercase tracking-widest">
@@ -26,10 +26,10 @@ const ContactSection = () => {
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
           {/* Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
             className="space-y-8"
           >
             <div className="flex items-start gap-4">
@@ -86,10 +86,10 @@ const ContactSection = () => {
 
           {/* Map Embed */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 10 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
             className="rounded-xl overflow-hidden border border-border shadow-[var(--shadow-card)] h-[400px]"
           >
             <iframe
