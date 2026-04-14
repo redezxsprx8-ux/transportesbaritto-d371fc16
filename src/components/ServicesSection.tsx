@@ -1,4 +1,5 @@
 import { Truck, Package, Clock, Shield, Anchor, BarChart3 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const services = [
   {
@@ -37,7 +38,13 @@ const ServicesSection = () => {
   return (
     <section id="servicios" className="py-24 bg-background">
       <div className="container">
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-2xl mx-auto mb-16"
+        >
           <span className="text-sm font-semibold text-accent uppercase tracking-widest">
             Nuestros servicios
           </span>
@@ -47,12 +54,16 @@ const ServicesSection = () => {
           <p className="text-muted-foreground mt-4">
             Más de 20 años conectando las Islas Canarias con un servicio fiable, rápido y económico.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <div
+          {services.map((service, i) => (
+            <motion.div
               key={service.title}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
               className="group rounded-xl border border-border bg-card p-8 transition-all duration-300 hover:shadow-[var(--shadow-elevated)] hover:-translate-y-1"
             >
               <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-5 group-hover:bg-accent/20 transition-colors">
@@ -64,7 +75,7 @@ const ServicesSection = () => {
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {service.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
