@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Ship, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Ship, Menu, X, PackageSearch } from "lucide-react";
 
 const navLinks = [
-  { label: "Inicio", href: "#" },
-  { label: "Servicios", href: "#servicios" },
-  { label: "Reseñas", href: "#resenas" },
-  { label: "Contacto", href: "#contacto" },
+  { label: "Inicio", href: "/#" },
+  { label: "Servicios", href: "/#servicios" },
+  { label: "Reseñas", href: "/#resenas" },
+  { label: "Contacto", href: "/#contacto" },
 ];
 
 const Navbar = () => {
@@ -14,7 +15,7 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-md border-b border-primary-foreground/10">
       <div className="container flex items-center justify-between h-16">
-        <a href="#" className="flex items-center gap-2 text-primary-foreground font-heading font-bold text-lg">
+        <a href="/" className="flex items-center gap-2 text-primary-foreground font-heading font-bold text-lg">
           <Ship className="w-6 h-6 text-secondary" />
           Baritto
         </a>
@@ -30,6 +31,13 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
+          <Link
+            to="/seguimiento"
+            className="inline-flex items-center gap-1.5 text-primary-foreground/70 hover:text-secondary transition-colors text-sm font-medium"
+          >
+            <PackageSearch className="w-4 h-4" />
+            Seguimiento
+          </Link>
           <a
             href="tel:+34922619077"
             className="rounded-lg bg-secondary text-secondary-foreground px-5 py-2 text-sm font-semibold hover:brightness-110 transition-all"
@@ -57,6 +65,14 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
+          <Link
+            to="/seguimiento"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 text-primary-foreground/80 hover:text-secondary transition-colors font-medium"
+          >
+            <PackageSearch className="w-4 h-4" />
+            Seguimiento
+          </Link>
         </div>
       )}
     </nav>
