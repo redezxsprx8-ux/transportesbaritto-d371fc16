@@ -105,35 +105,25 @@ const Calculadora = () => {
     }
 
     if (service === "flores") {
-      if (flowerSize === "pequenas") {
-        // Pequeñas: mínimo 1 bulto, tarifa estándar por bulto
-        const n = Math.max(1, parseInt(packages) || 1);
-        const total = RATE_PER_PACKAGE[remoteKey] * n;
-        return {
-          total: Math.round(total * 100) / 100,
-          breakdown: [
-            { label: "Flores pequeñas (mín. 1 bulto)", value: `${n} bulto${n > 1 ? "s" : ""}` },
-            { label: `${n} × ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` },
-          ],
-          transit: "Hoy laborable → entrega mañana",
-        };
-      } else {
-        // Grandes: 12€ los dos (El Hierro y La Palma)
-        return {
-          total: FLOWERS_LARGE_PRICE,
-          breakdown: [
-            { label: "Flores grandes (los dos)", value: `${FLOWERS_LARGE_PRICE.toFixed(2)}€` },
-          ],
-          transit: "Hoy laborable → entrega mañana",
-        };
-      }
+      const n = Math.max(1, parseInt(flowerBoxes) || 1);
+      const rate = FLOWER_RATE[flowerSize];
+      const total = rate * n;
+      const sizeLabel =
+        flowerSize === "normal" ? "Normal" : flowerSize === "grande" ? "Grande" : "Baúl";
+      return {
+        total: Math.round(total * 100) / 100,
+        breakdown: [
+          { label: `Flores (${sizeLabel})`, value: `${n} caja${n > 1 ? "s" : ""}` },
+          { label: `${n} × ${rate.toFixed(2)}€`, value: `${total.toFixed(2)}€` },
+        ],
+        transit: "Hoy laborable → entrega mañana",
+      };
     }
 
     // Carga / mudanza
-
     const w = parseFloat(weight) || 0;
     const v = parseFloat(volume) || 0;
-    if (w <= 0 && v <= 0 && !outOfPallet) return null;
+    if (w <= 0 && v <= 0) return null;
 
     const lines: { label: string; value: string }[] = [];
     let total = 0;
@@ -141,20 +131,19 @@ const Calculadora = () => {
     if (w >= KG_THRESHOLD) {
       const kgCost = w * RATE_PER_KG;
       total += kgCost;
-      lines.push({ label: `${w} kg × ${RATE_PER_KG.toFixed(2)}€`, value: `${kgCost.toFixed(2)}€` });
+      lines.push({ label: `Peso ${w} kg`, value: `${kgCost.toFixed(2)}€` });
     } else if (w > 0) {
-      lines.push({ label: `Peso ${w} kg`, value: `< ${KG_THRESHOLD} kg (consultar)` });
+      lines.push({ label: `Peso ${w} kg`, value: `consultar` });
     }
 
     if (v > 0) {
-      const m3Cost = v * RATE_PER_M3;
+      const m3Rate = outOfPallet ? RATE_PER_M3_OUT : RATE_PER_M3_NORMAL;
+      const m3Cost = v * m3Rate;
       total += m3Cost;
-      lines.push({ label: `${v} m³ × ${RATE_PER_M3}€`, value: `${m3Cost.toFixed(2)}€` });
-    }
-
-    if (outOfPallet) {
-      total += RATE_OUT_OF_PALLET;
-      lines.push({ label: "Fuera de medida palet (americano/europeo)", value: `${RATE_OUT_OF_PALLET.toFixed(2)}€` });
+      lines.push({
+        label: outOfPallet ? `${v} m³ (fuera de medida)` : `${v} m³`,
+        value: `${m3Cost.toFixed(2)}€`,
+      });
     }
 
     if (total <= 0) return null;
