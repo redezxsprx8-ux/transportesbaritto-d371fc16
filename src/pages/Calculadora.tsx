@@ -16,6 +16,7 @@ import {
 
 type Island = "tenerife" | "la-palma" | "el-hierro" | "la-gomera";
 type ServiceType = "paqueteria" | "carga" | "flores";
+type FlowerSize = "normal" | "grande" | "baul";
 
 const ISLANDS: { value: Island; label: string }[] = [
   { value: "tenerife", label: "Tenerife" },
@@ -27,33 +28,39 @@ const ISLANDS: { value: Island; label: string }[] = [
 const SERVICES: { value: ServiceType; label: string; icon: typeof Package; description: string }[] = [
   { value: "paqueteria", label: "Paquetería (por bulto)", icon: Package, description: "Envío estándar por número de bultos" },
   { value: "carga", label: "Cargo", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
-  { value: "flores", label: "Flores", icon: Flower2, description: "Tarifa especial pequeñas o grandes" },
+  { value: "flores", label: "Flores", icon: Flower2, description: "Cajas de flores: normal, grande o baúl" },
 ];
 
-// Tarifas por bulto (paquetería estándar)
+// Tarifas internas (no mostrar al cliente)
 const RATE_PER_PACKAGE: Record<Exclude<Island, "tenerife" | "la-gomera">, number> = {
   "la-palma": 9.18,
   "el-hierro": 10.70,
 };
 
-// Flores grandes (precio por los dos, mínimo 1 bulto)
-const FLOWERS_LARGE_PRICE = 12; // El Hierro y La Palma
-
+// Flores: precio por caja según tamaño (LP / EH)
+const FLOWER_RATE: Record<FlowerSize, number> = {
+  normal: 9.18,   // equivalente a bulto estándar (se toma la menor tarifa)
+  grande: 12,     // grandes: 12€
+  baul: 18,       // baúl: 18€
+};
 
 // Carga general
 const RATE_PER_KG = 0.15; // a partir de 400kg
 const KG_THRESHOLD = 400;
-const RATE_PER_M3 = 55;
-const RATE_OUT_OF_PALLET = 75; // fuera de medida palet americano/europeo
+const RATE_PER_M3_NORMAL = 55;
+const RATE_PER_M3_OUT = 75; // fuera de medida de palet europeo/americano
 
 const Calculadora = () => {
   const [origin, setOrigin] = useState<Island | "">("");
   const [destination, setDestination] = useState<Island | "">("");
   const [service, setService] = useState<ServiceType>("paqueteria");
 
-  // Paquetería / flores / baúl
+  // Paquetería
   const [packages, setPackages] = useState("1");
-  const [flowerSize, setFlowerSize] = useState<"pequenas" | "grandes">("pequenas");
+
+  // Flores
+  const [flowerSize, setFlowerSize] = useState<FlowerSize>("normal");
+  const [flowerBoxes, setFlowerBoxes] = useState("1");
 
   // Carga general
   const [weight, setWeight] = useState("");
