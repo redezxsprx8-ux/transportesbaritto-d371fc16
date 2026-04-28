@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Ship, X, Info } from "lucide-react";
 
-const STORAGE_KEY = "baritto_welcome_seen_v1";
+const STORAGE_KEY = "baritto_welcome_seen_v2";
 
 const WelcomePopup = () => {
   const [open, setOpen] = useState(false);
