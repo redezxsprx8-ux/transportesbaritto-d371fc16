@@ -13,6 +13,7 @@ const schema = z.object({
   email: z.string().trim().email().max(255),
   password: z.string().min(6).max(72),
 });
+type SchemaType = z.infer<typeof schema>;
 
 const StaffLogin = () => {
   const navigate = useNavigate();
@@ -35,7 +36,8 @@ const StaffLogin = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const data: SchemaType = parsed.data;
+    const { error } = await supabase.auth.signInWithPassword(data);
     setLoading(false);
     if (error) {
       setError("Credenciales incorrectas");
