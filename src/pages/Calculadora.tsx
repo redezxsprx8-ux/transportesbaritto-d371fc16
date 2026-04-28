@@ -284,17 +284,34 @@ const Calculadora = () => {
 
               {/* Campos dinámicos según servicio */}
               {(service === "paqueteria" || (service === "flores" && flowerSize === "pequenas")) && (
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={packages}
-                    onChange={(e) => setPackages(e.target.value)}
-                    placeholder="Ej: 2"
-                    className="h-11"
-                  />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={packages}
+                      onChange={(e) => setPackages(e.target.value)}
+                      placeholder="Ej: 2"
+                      className="h-11"
+                    />
+                  </div>
+                  {service === "paqueteria" && (
+                    <div>
+                      <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="Ej: 25"
+                        className="h-11"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">Hasta 20 kg = 1 bulto. Después se suma 1 bulto cada 20 kg.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
