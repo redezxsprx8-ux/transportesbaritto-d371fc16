@@ -14,16 +14,249 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pickup_requests: {
+        Row: {
+          address: string
+          cif: string | null
+          company: string
+          contact: string
+          created_at: string
+          details: string | null
+          email: string | null
+          id: string
+          packages: number | null
+          phone: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          weight: number | null
+          zone: string
+        }
+        Insert: {
+          address: string
+          cif?: string | null
+          company: string
+          contact: string
+          created_at?: string
+          details?: string | null
+          email?: string | null
+          id?: string
+          packages?: number | null
+          phone: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          weight?: number | null
+          zone: string
+        }
+        Update: {
+          address?: string
+          cif?: string | null
+          company?: string
+          contact?: string
+          created_at?: string
+          details?: string | null
+          email?: string | null
+          id?: string
+          packages?: number | null
+          phone?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          weight?: number | null
+          zone?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address: string | null
+          cif: string | null
+          company_name: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          zone: string | null
+        }
+        Insert: {
+          address?: string | null
+          cif?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          zone?: string | null
+        }
+        Update: {
+          address?: string | null
+          cif?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          zone?: string | null
+        }
+        Relationships: []
+      }
+      quote_requests: {
+        Row: {
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          destination: string
+          estimated_total: number | null
+          flower_boxes: number | null
+          flower_size: string | null
+          id: string
+          notes: string | null
+          origin: string
+          out_of_pallet: boolean | null
+          packages: number | null
+          service: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          volume: number | null
+          weight: number | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          destination: string
+          estimated_total?: number | null
+          flower_boxes?: number | null
+          flower_size?: string | null
+          id?: string
+          notes?: string | null
+          origin: string
+          out_of_pallet?: boolean | null
+          packages?: number | null
+          service: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          volume?: number | null
+          weight?: number | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          destination?: string
+          estimated_total?: number | null
+          flower_boxes?: number | null
+          flower_size?: string | null
+          id?: string
+          notes?: string | null
+          origin?: string
+          out_of_pallet?: boolean | null
+          packages?: number | null
+          service?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          volume?: number | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      shipments: {
+        Row: {
+          client_name: string | null
+          client_user_id: string | null
+          created_at: string
+          destination: string
+          id: string
+          notes: string | null
+          origin: string
+          packages: number | null
+          price: number | null
+          scheduled_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_name?: string | null
+          client_user_id?: string | null
+          created_at?: string
+          destination: string
+          id?: string
+          notes?: string | null
+          origin: string
+          packages?: number | null
+          price?: number | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string | null
+          client_user_id?: string | null
+          created_at?: string
+          destination?: string
+          id?: string
+          notes?: string | null
+          origin?: string
+          packages?: number | null
+          price?: number | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "trabajador" | "cliente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +383,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["trabajador", "cliente"],
+    },
   },
 } as const

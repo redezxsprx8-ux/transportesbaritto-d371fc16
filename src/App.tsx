@@ -8,6 +8,9 @@ import NotFound from "./pages/NotFound.tsx";
 import Tracking from "./pages/Tracking.tsx";
 import Calculadora from "./pages/Calculadora.tsx";
 import Recogidas from "./pages/Recogidas.tsx";
+import Auth from "./pages/Auth.tsx";
+import StaffLogin from "./pages/StaffLogin.tsx";
+import Panel from "./pages/Panel.tsx";
 import WelcomePopup from "./components/WelcomePopup";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ const App = () => (
           <Route path="/seguimiento" element={<Tracking />} />
           <Route path="/calculadora" element={<Calculadora />} />
           <Route path="/recogidas" element={<Recogidas />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/staff-login" element={<StaffLogin />} />
+          <Route path="/panel" element={<Panel />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
