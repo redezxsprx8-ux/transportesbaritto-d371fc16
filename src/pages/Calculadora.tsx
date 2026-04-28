@@ -26,9 +26,8 @@ const ISLANDS: { value: Island; label: string }[] = [
 
 const SERVICES: { value: ServiceType; label: string; icon: typeof Package; description: string }[] = [
   { value: "paqueteria", label: "Paquetería (por bulto)", icon: Package, description: "Envío estándar por número de bultos" },
-  { value: "carga", label: "Carga general / Mudanza", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
+  { value: "carga", label: "Cargo", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
   { value: "flores", label: "Flores", icon: Flower2, description: "Tarifa especial pequeñas o grandes" },
-  { value: "baul", label: "Baúl", icon: Archive, description: "Tarifa fija por baúl" },
 ];
 
 // Tarifas por bulto (paquetería estándar)
