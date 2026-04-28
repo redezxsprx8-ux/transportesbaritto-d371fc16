@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calculator, Ship, Package, Truck, Zap, Info, ArrowRight } from "lucide-react";
+import { Calculator, Package, Truck, Flower2, Archive, Info, ArrowRight, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -14,68 +14,155 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type Island = "tenerife" | "la-palma" | "el-hierro" | "gran-canaria" | "lanzarote" | "fuerteventura";
-type ServiceType = "paqueteria" | "carga" | "mudanza" | "urgente";
+type Island = "tenerife" | "la-palma" | "el-hierro" | "la-gomera";
+type ServiceType = "paqueteria" | "carga" | "flores" | "baul";
 
 const ISLANDS: { value: Island; label: string }[] = [
   { value: "tenerife", label: "Tenerife" },
   { value: "la-palma", label: "La Palma" },
   { value: "el-hierro", label: "El Hierro" },
-  { value: "gran-canaria", label: "Gran Canaria" },
-  { value: "lanzarote", label: "Lanzarote" },
-  { value: "fuerteventura", label: "Fuerteventura" },
+  { value: "la-gomera", label: "La Gomera (bajo encargo)" },
 ];
 
-const SERVICES: { value: ServiceType; label: string; icon: typeof Package; multiplier: number; base: number }[] = [
-  { value: "paqueteria", label: "Paquetería", icon: Package, multiplier: 1, base: 12 },
-  { value: "carga", label: "Carga general", icon: Truck, multiplier: 0.85, base: 25 },
-  { value: "mudanza", label: "Mudanza inter-islas", icon: Ship, multiplier: 1.15, base: 60 },
-  { value: "urgente", label: "Envío urgente 24h", icon: Zap, multiplier: 1.6, base: 35 },
+const SERVICES: { value: ServiceType; label: string; icon: typeof Package; description: string }[] = [
+  { value: "paqueteria", label: "Paquetería (por bulto)", icon: Package, description: "Envío estándar por número de bultos" },
+  { value: "carga", label: "Carga general / Mudanza", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
+  { value: "flores", label: "Flores", icon: Flower2, description: "Tarifa especial pequeñas o grandes" },
+  { value: "baul", label: "Baúl", icon: Archive, description: "Tarifa fija por baúl" },
 ];
 
-// Distancia relativa entre islas (factor)
-const ISLAND_FACTOR: Record<Island, number> = {
-  tenerife: 1.0,
-  "la-palma": 1.15,
-  "el-hierro": 1.25,
-  "gran-canaria": 1.1,
-  lanzarote: 1.3,
-  fuerteventura: 1.3,
+// Tarifas por bulto (paquetería estándar)
+const RATE_PER_PACKAGE: Record<Exclude<Island, "tenerife" | "la-gomera">, number> = {
+  "la-palma": 9.18,
+  "el-hierro": 10.70,
 };
+
+// Flores grandes (precio por los dos, mínimo 1 bulto)
+const FLOWERS_LARGE_PRICE = 12; // El Hierro y La Palma
+const TRUNK_PRICE = 18; // baúl los dos
+
+// Carga general
+const RATE_PER_KG = 0.15; // a partir de 400kg
+const KG_THRESHOLD = 400;
+const RATE_PER_M3 = 55;
+const RATE_OUT_OF_PALLET = 75; // fuera de medida palet americano/europeo
 
 const Calculadora = () => {
   const [origin, setOrigin] = useState<Island | "">("");
   const [destination, setDestination] = useState<Island | "">("");
   const [service, setService] = useState<ServiceType>("paqueteria");
+
+  // Paquetería / flores / baúl
+  const [packages, setPackages] = useState("1");
+  const [flowerSize, setFlowerSize] = useState<"pequenas" | "grandes">("pequenas");
+
+  // Carga general
   const [weight, setWeight] = useState("");
   const [volume, setVolume] = useState("");
+  const [outOfPallet, setOutOfPallet] = useState(false);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
+  const isOnRequest = destination === "la-gomera" || origin === "la-gomera";
+
   const estimate = useMemo(() => {
     if (!origin || !destination || origin === destination) return null;
+    if (isOnRequest) return null;
+
+    // Solo trabajamos rutas que incluyan Tenerife como hub o entre La Palma/El Hierro y Tenerife.
+    // Determinamos la isla "remota" (la que no es Tenerife) para aplicar tarifas.
+    const remote: Island | null =
+      origin === "tenerife" ? destination
+      : destination === "tenerife" ? origin
+      : null;
+
+    if (remote !== "la-palma" && remote !== "el-hierro") return null;
+
+    const remoteKey = remote;
+
+    if (service === "paqueteria") {
+      const n = Math.max(1, parseInt(packages) || 1);
+      const total = RATE_PER_PACKAGE[remoteKey] * n;
+      return {
+        total: Math.round(total * 100) / 100,
+        breakdown: [
+          { label: `${n} bulto${n > 1 ? "s" : ""} a ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` },
+        ],
+        transit: "Hoy laborable → entrega mañana",
+      };
+    }
+
+    if (service === "flores") {
+      if (flowerSize === "pequenas") {
+        // Pequeñas: mínimo 1 bulto, tarifa estándar por bulto
+        const n = Math.max(1, parseInt(packages) || 1);
+        const total = RATE_PER_PACKAGE[remoteKey] * n;
+        return {
+          total: Math.round(total * 100) / 100,
+          breakdown: [
+            { label: "Flores pequeñas (mín. 1 bulto)", value: `${n} bulto${n > 1 ? "s" : ""}` },
+            { label: `${n} × ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` },
+          ],
+          transit: "Hoy laborable → entrega mañana",
+        };
+      } else {
+        // Grandes: 12€ los dos (El Hierro y La Palma)
+        return {
+          total: FLOWERS_LARGE_PRICE,
+          breakdown: [
+            { label: "Flores grandes (los dos)", value: `${FLOWERS_LARGE_PRICE.toFixed(2)}€` },
+          ],
+          transit: "Hoy laborable → entrega mañana",
+        };
+      }
+    }
+
+    if (service === "baul") {
+      return {
+        total: TRUNK_PRICE,
+        breakdown: [
+          { label: "Baúl (los dos)", value: `${TRUNK_PRICE.toFixed(2)}€` },
+        ],
+        transit: "Hoy laborable → entrega mañana",
+      };
+    }
+
+    // Carga general / mudanza
     const w = parseFloat(weight) || 0;
     const v = parseFloat(volume) || 0;
-    if (w <= 0 && v <= 0) return null;
+    if (w <= 0 && v <= 0 && !outOfPallet) return null;
 
-    const svc = SERVICES.find((s) => s.value === service)!;
-    // Peso volumétrico: 1 m³ ≈ 250 kg
-    const volumetricWeight = v * 250;
-    const billableWeight = Math.max(w, volumetricWeight);
+    const lines: { label: string; value: string }[] = [];
+    let total = 0;
 
-    const distanceFactor = (ISLAND_FACTOR[origin] + ISLAND_FACTOR[destination]) / 2;
-    const pricePerKg = 0.45 * svc.multiplier;
-    const subtotal = svc.base + billableWeight * pricePerKg * distanceFactor;
-    const total = Math.round(subtotal * 100) / 100;
+    if (w >= KG_THRESHOLD) {
+      const kgCost = w * RATE_PER_KG;
+      total += kgCost;
+      lines.push({ label: `${w} kg × ${RATE_PER_KG.toFixed(2)}€`, value: `${kgCost.toFixed(2)}€` });
+    } else if (w > 0) {
+      lines.push({ label: `Peso ${w} kg`, value: `< ${KG_THRESHOLD} kg (consultar)` });
+    }
+
+    if (v > 0) {
+      const m3Cost = v * RATE_PER_M3;
+      total += m3Cost;
+      lines.push({ label: `${v} m³ × ${RATE_PER_M3}€`, value: `${m3Cost.toFixed(2)}€` });
+    }
+
+    if (outOfPallet) {
+      total += RATE_OUT_OF_PALLET;
+      lines.push({ label: "Fuera de medida palet (americano/europeo)", value: `${RATE_OUT_OF_PALLET.toFixed(2)}€` });
+    }
+
+    if (total <= 0) return null;
 
     return {
-      total,
-      min: Math.round(total * 0.9 * 100) / 100,
-      max: Math.round(total * 1.15 * 100) / 100,
-      billableWeight: Math.round(billableWeight * 10) / 10,
-      transitDays: service === "urgente" ? "24h" : "2-4 días laborables",
+      total: Math.round(total * 100) / 100,
+      breakdown: lines,
+      transit: "Hoy laborable → entrega mañana",
     };
-  }, [origin, destination, service, weight, volume]);
+  }, [origin, destination, isOnRequest, service, packages, flowerSize, weight, volume, outOfPallet]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,13 +172,20 @@ const Calculadora = () => {
     if (origin && destination && origin === destination) {
       newErrors.destination = "Origen y destino deben ser distintos";
     }
-    const w = parseFloat(weight);
-    const v = parseFloat(volume);
-    if ((!w || w <= 0) && (!v || v <= 0)) {
-      newErrors.weight = "Introduce peso o volumen";
+    if (origin && destination && origin !== destination && !isOnRequest) {
+      // Debe haber Tenerife en uno de los extremos
+      if (origin !== "tenerife" && destination !== "tenerife") {
+        newErrors.destination = "Las rutas operan con Tenerife como origen o destino";
+      }
     }
-    if (w && (w < 0 || w > 10000)) newErrors.weight = "Peso entre 0 y 10.000 kg";
-    if (v && (v < 0 || v > 200)) newErrors.volume = "Volumen entre 0 y 200 m³";
+
+    if (service === "carga" && !isOnRequest) {
+      const w = parseFloat(weight);
+      const v = parseFloat(volume);
+      if ((!w || w <= 0) && (!v || v <= 0) && !outOfPallet) {
+        newErrors.weight = "Introduce peso, volumen o marca fuera de medida";
+      }
+    }
 
     setErrors(newErrors);
     setSubmitted(Object.keys(newErrors).length === 0);
@@ -115,7 +209,7 @@ const Calculadora = () => {
               Calcula tu envío al instante
             </h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Estimación orientativa para envíos entre islas. Recibirás un presupuesto definitivo tras confirmar los detalles con nuestro equipo.
+              Tarifas orientativas para envíos entre Tenerife, La Palma y El Hierro. Se envía hoy laborable y se entrega al día siguiente.
             </p>
           </motion.div>
 
@@ -174,55 +268,111 @@ const Calculadora = () => {
                         key={s.value}
                         type="button"
                         onClick={() => setService(s.value)}
-                        className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all text-left ${
+                        className={`flex items-start gap-2 p-3 rounded-lg border-2 transition-all text-left ${
                           active
                             ? "border-secondary bg-secondary/10 text-primary"
                             : "border-border hover:border-secondary/50 text-foreground"
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${active ? "text-secondary" : "text-muted-foreground"}`} />
-                        <span className="text-sm font-medium">{s.label}</span>
+                        <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${active ? "text-secondary" : "text-muted-foreground"}`} />
+                        <div>
+                          <div className="text-sm font-medium leading-tight">{s.label}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5 leading-tight">{s.description}</div>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              {/* Campos dinámicos según servicio */}
+              {(service === "paqueteria" || (service === "flores" && flowerSize === "pequenas")) && (
                 <div>
-                  <Label className="text-sm font-semibold mb-2 block">Peso (kg)</Label>
+                  <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
                   <Input
                     type="number"
-                    min="0"
-                    max="10000"
-                    step="0.1"
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    placeholder="Ej: 25"
+                    min="1"
+                    step="1"
+                    value={packages}
+                    onChange={(e) => setPackages(e.target.value)}
+                    placeholder="Ej: 2"
                     className="h-11"
                   />
                 </div>
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Volumen (m³)</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="200"
-                    step="0.01"
-                    value={volume}
-                    onChange={(e) => setVolume(e.target.value)}
-                    placeholder="Ej: 0.5"
-                    className="h-11"
-                  />
-                </div>
-              </div>
-              {(errors.weight || errors.volume) && (
-                <p className="text-xs text-destructive">{errors.weight || errors.volume}</p>
               )}
+
+              {service === "flores" && (
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Tamaño</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["pequenas", "grandes"] as const).map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => setFlowerSize(size)}
+                        className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                          flowerSize === size
+                            ? "border-secondary bg-secondary/10 text-primary"
+                            : "border-border hover:border-secondary/50 text-foreground"
+                        }`}
+                      >
+                        {size === "pequenas" ? "Pequeñas (mín. 1 bulto)" : "Grandes (los dos)"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {service === "carga" && (
+                <>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-semibold mb-2 block">Peso (kg)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="Ej: 500"
+                        className="h-11"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">0,15€/kg a partir de 400 kg</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold mb-2 block">Volumen (m³)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={volume}
+                        onChange={(e) => setVolume(e.target.value)}
+                        placeholder="Ej: 1.5"
+                        className="h-11"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">55€/m³</p>
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/40 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={outOfPallet}
+                      onChange={(e) => setOutOfPallet(e.target.checked)}
+                      className="w-4 h-4 accent-[hsl(var(--secondary))]"
+                    />
+                    <div>
+                      <div className="text-sm font-medium">Fuera de medida de palet</div>
+                      <div className="text-[11px] text-muted-foreground">Excede palet americano o europeo (+75€)</div>
+                    </div>
+                  </label>
+                </>
+              )}
+
+              {errors.weight && <p className="text-xs text-destructive">{errors.weight}</p>}
 
               <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
                 <Info className="w-4 h-4 mt-0.5 flex-shrink-0 text-secondary" />
-                <span>Se factura el mayor entre peso real y peso volumétrico (1 m³ ≈ 250 kg).</span>
+                <span>Operamos entre Tenerife, La Palma y El Hierro. La Gomera es bajo encargo (consulta directa).</span>
               </div>
 
               <Button
@@ -247,35 +397,49 @@ const Calculadora = () => {
                   Estimación
                 </p>
 
-                {submitted && estimate ? (
+                {submitted && isOnRequest ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="py-6"
+                  >
+                    <p className="font-heading text-3xl font-bold text-secondary mb-3">
+                      Bajo encargo
+                    </p>
+                    <p className="text-sm text-primary-foreground/80 mb-6">
+                      Los envíos hacia o desde La Gomera se gestionan bajo encargo. Contáctanos para un presupuesto personalizado.
+                    </p>
+                    <a
+                      href="/#contacto"
+                      className="flex items-center justify-center gap-2 w-full bg-secondary text-secondary-foreground rounded-lg py-3 font-semibold hover:brightness-110 transition-all"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Contactar
+                    </a>
+                  </motion.div>
+                ) : submitted && estimate ? (
                   <motion.div
                     key={estimate.total}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <p className="text-xs text-primary-foreground/60 mb-1">Desde</p>
-                    <p className="font-heading text-5xl font-bold text-secondary mb-1">
-                      {estimate.min.toFixed(2)}€
-                    </p>
-                    <p className="text-sm text-primary-foreground/70 mb-6">
-                      Rango: {estimate.min.toFixed(2)}€ – {estimate.max.toFixed(2)}€
+                    <p className="text-xs text-primary-foreground/60 mb-1">Total estimado</p>
+                    <p className="font-heading text-5xl font-bold text-secondary mb-6">
+                      {estimate.total.toFixed(2)}€
                     </p>
 
-                    <div className="space-y-3 pb-6 mb-6 border-b border-primary-foreground/15">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-primary-foreground/70">Peso facturable</span>
-                        <span className="font-semibold">{estimate.billableWeight} kg</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-primary-foreground/70">Tiempo de tránsito</span>
-                        <span className="font-semibold">{estimate.transitDays}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-primary-foreground/70">Servicio</span>
-                        <span className="font-semibold">
-                          {SERVICES.find((s) => s.value === service)?.label}
-                        </span>
+                    <div className="space-y-2 pb-6 mb-6 border-b border-primary-foreground/15">
+                      {estimate.breakdown.map((line, idx) => (
+                        <div key={idx} className="flex justify-between text-sm gap-3">
+                          <span className="text-primary-foreground/70">{line.label}</span>
+                          <span className="font-semibold text-right">{line.value}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between text-sm pt-2">
+                        <span className="text-primary-foreground/70">Plazo</span>
+                        <span className="font-semibold text-right">{estimate.transit}</span>
                       </div>
                     </div>
 
