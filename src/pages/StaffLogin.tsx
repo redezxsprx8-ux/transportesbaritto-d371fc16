@@ -36,8 +36,10 @@ const StaffLogin = () => {
       return;
     }
     setLoading(true);
-    const data: SchemaType = parsed.data;
-    const { error } = await supabase.auth.signInWithPassword(data);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: form.email.trim(),
+      password: form.password,
+    });
     setLoading(false);
     if (error) {
       setError("Credenciales incorrectas");

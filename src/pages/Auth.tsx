@@ -58,8 +58,8 @@ const Auth = () => {
           return;
         }
         const { error } = await supabase.auth.signInWithPassword({
-          email: parsed.data.email,
-          password: parsed.data.password,
+          email: form.email.trim(),
+          password: form.password,
         });
         if (error) {
           setError(
@@ -78,15 +78,15 @@ const Auth = () => {
           return;
         }
         const { error } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
+          email: form.email.trim(),
+          password: form.password,
           options: {
             emailRedirectTo: `${window.location.origin}/panel`,
             data: {
-              full_name: parsed.data.full_name,
-              phone: parsed.data.phone ?? "",
-              company_name: parsed.data.company_name ?? "",
-              cif: parsed.data.cif ?? "",
+              full_name: form.full_name,
+              phone: form.phone,
+              company_name: form.company_name,
+              cif: form.cif,
             },
           },
         });
