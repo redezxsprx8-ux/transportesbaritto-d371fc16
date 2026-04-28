@@ -77,9 +77,9 @@ const Calculadora = () => {
       : destination === "tenerife" ? origin
       : null;
 
-    if (!remote || remote === "tenerife" || remote === "la-gomera") return null;
+    if (remote !== "la-palma" && remote !== "el-hierro") return null;
 
-    const remoteKey = remote as "la-palma" | "el-hierro";
+    const remoteKey = remote;
 
     if (service === "paqueteria") {
       const n = Math.max(1, parseInt(packages) || 1);
