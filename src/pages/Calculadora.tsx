@@ -309,7 +309,7 @@ const Calculadora = () => {
                         placeholder="Ej: 25"
                         className="h-11"
                       />
-                      <p className="text-[11px] text-muted-foreground mt-1">Hasta 20 kg = 1 bulto. Después se suma 1 bulto cada 20 kg.</p>
+                      
                     </div>
                   )}
                 </div>
