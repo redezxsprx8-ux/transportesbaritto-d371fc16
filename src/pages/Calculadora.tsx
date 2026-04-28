@@ -38,7 +38,7 @@ const RATE_PER_PACKAGE: Record<Exclude<Island, "tenerife" | "la-gomera">, number
 
 // Flores grandes (precio por los dos, mínimo 1 bulto)
 const FLOWERS_LARGE_PRICE = 12; // El Hierro y La Palma
-const TRUNK_PRICE = 18; // baúl los dos
+
 
 // Carga general
 const RATE_PER_KG = 0.15; // a partir de 400kg
