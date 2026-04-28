@@ -173,8 +173,8 @@ const Calculadora = () => {
     if (service === "carga" && !isOnRequest) {
       const w = parseFloat(weight);
       const v = parseFloat(volume);
-      if ((!w || w <= 0) && (!v || v <= 0) && !outOfPallet) {
-        newErrors.weight = "Introduce peso, volumen o marca fuera de medida";
+      if ((!w || w <= 0) && (!v || v <= 0)) {
+        newErrors.weight = "Introduce peso o volumen";
       }
     }
 
