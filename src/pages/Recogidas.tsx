@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { PackagePlus, Building2, MapPin, Phone, Mail, Info, CheckCircle2, Send } from "lucide-react";
+import { PackagePlus, Building2, MapPin, Phone, Mail, Info, CheckCircle2, Send, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const ZONES = [
   "La Cuesta",
@@ -27,6 +31,7 @@ const ZONES = [
 ];
 
 const Recogidas = () => {
+  const { user } = useAuth();
   const [form, setForm] = useState({
     company: "",
     cif: "",
@@ -41,11 +46,35 @@ const Recogidas = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const update = (k: keyof typeof form, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Autorrellenar si hay sesión
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("full_name, email, phone, company_name, cif, address, zone")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        setForm((f) => ({
+          ...f,
+          company: f.company || data.company_name || "",
+          cif: f.cif || data.cif || "",
+          contact: f.contact || data.full_name || "",
+          phone: f.phone || data.phone || "",
+          email: f.email || data.email || user.email || "",
+          zone: f.zone || data.zone || "",
+          address: f.address || data.address || "",
+        }));
+      });
+  }, [user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const err: Record<string, string> = {};
     if (!form.company.trim()) err.company = "Introduce el nombre de la empresa";
@@ -57,25 +86,33 @@ const Recogidas = () => {
     setErrors(err);
     if (Object.keys(err).length > 0) return;
 
-    // Componer mensaje para WhatsApp/llamada alternativa
-    const subject = `Solicitud de recogida - ${form.company}`;
-    const body =
-      `Empresa: ${form.company}\n` +
-      `CIF: ${form.cif}\n` +
-      `Contacto: ${form.contact}\n` +
-      `Teléfono: ${form.phone}\n` +
-      `Email: ${form.email}\n` +
-      `Zona: ${form.zone}\n` +
-      `Dirección: ${form.address}\n` +
-      `Bultos: ${form.packages}\n` +
-      `Peso total (kg): ${form.weight}\n` +
-      `Detalles: ${form.details}`;
+    setSubmitting(true);
+    const { error } = await supabase.from("pickup_requests").insert({
+      user_id: user?.id ?? null,
+      company: form.company.trim(),
+      cif: form.cif.trim() || null,
+      contact: form.contact.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim() || null,
+      zone: form.zone,
+      address: form.address.trim(),
+      packages: parseInt(form.packages) || 1,
+      weight: form.weight ? parseFloat(form.weight) : null,
+      details: form.details.trim() || null,
+    });
+    setSubmitting(false);
 
-    window.location.href = `mailto:info@transportesbaritto.com?subject=${encodeURIComponent(
-      subject,
-    )}&body=${encodeURIComponent(body)}`;
+    if (error) {
+      toast({
+        title: "Error al enviar",
+        description: "Inténtalo de nuevo o llámanos directamente.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setSent(true);
+    toast({ title: "Solicitud enviada", description: "Te contactaremos a la mayor brevedad." });
   };
 
   return (
