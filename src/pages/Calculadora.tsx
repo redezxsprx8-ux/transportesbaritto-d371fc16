@@ -117,17 +117,8 @@ const Calculadora = () => {
       }
     }
 
-    if (service === "baul") {
-      return {
-        total: TRUNK_PRICE,
-        breakdown: [
-          { label: "Baúl (los dos)", value: `${TRUNK_PRICE.toFixed(2)}€` },
-        ],
-        transit: "Hoy laborable → entrega mañana",
-      };
-    }
+    // Carga / mudanza
 
-    // Carga general / mudanza
     const w = parseFloat(weight) || 0;
     const v = parseFloat(volume) || 0;
     if (w <= 0 && v <= 0 && !outOfPallet) return null;
