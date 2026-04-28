@@ -156,6 +156,18 @@ const Recogidas = () => {
                 </span>
               </div>
 
+              {!user && (
+                <Link
+                  to="/auth"
+                  className="flex items-center justify-between gap-2 text-sm bg-secondary/10 border border-secondary/30 p-3 rounded-lg hover:bg-secondary/15 transition-colors"
+                >
+                  <span className="text-primary">
+                    ¿Tienes ficha con nosotros? Inicia sesión para autorrellenar tus datos.
+                  </span>
+                  <LogIn className="w-4 h-4 text-secondary flex-shrink-0" />
+                </Link>
+              )}
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-semibold mb-2 block">Empresa *</Label>
