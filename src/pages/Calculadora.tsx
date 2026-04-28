@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 
 type Island = "tenerife" | "la-palma" | "el-hierro" | "la-gomera";
-type ServiceType = "paqueteria" | "carga" | "flores" | "baul";
+type ServiceType = "paqueteria" | "carga" | "flores";
 
 const ISLANDS: { value: Island; label: string }[] = [
   { value: "tenerife", label: "Tenerife" },
