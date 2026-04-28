@@ -96,12 +96,6 @@ const Calculadora = () => {
         transit: "Hoy laborable → entrega mañana",
       };
     }
-      return {
-        total: Math.round(total * 100) / 100,
-        breakdown,
-        transit: "Hoy laborable → entrega mañana",
-      };
-    }
 
     if (service === "flores") {
       if (flowerSize === "pequenas") {
