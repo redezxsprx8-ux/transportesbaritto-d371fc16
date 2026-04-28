@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calculator, Package, Truck, Flower2, Archive, Info, ArrowRight, Phone } from "lucide-react";
+import { Calculator, Package, Truck, Flower2, Info, ArrowRight, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 
 type Island = "tenerife" | "la-palma" | "el-hierro" | "la-gomera";
-type ServiceType = "paqueteria" | "carga" | "flores" | "baul";
+type ServiceType = "paqueteria" | "carga" | "flores";
 
 const ISLANDS: { value: Island; label: string }[] = [
   { value: "tenerife", label: "Tenerife" },
@@ -26,9 +26,8 @@ const ISLANDS: { value: Island; label: string }[] = [
 
 const SERVICES: { value: ServiceType; label: string; icon: typeof Package; description: string }[] = [
   { value: "paqueteria", label: "Paquetería (por bulto)", icon: Package, description: "Envío estándar por número de bultos" },
-  { value: "carga", label: "Carga general / Mudanza", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
+  { value: "carga", label: "Cargo", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
   { value: "flores", label: "Flores", icon: Flower2, description: "Tarifa especial pequeñas o grandes" },
-  { value: "baul", label: "Baúl", icon: Archive, description: "Tarifa fija por baúl" },
 ];
 
 // Tarifas por bulto (paquetería estándar)
@@ -39,7 +38,7 @@ const RATE_PER_PACKAGE: Record<Exclude<Island, "tenerife" | "la-gomera">, number
 
 // Flores grandes (precio por los dos, mínimo 1 bulto)
 const FLOWERS_LARGE_PRICE = 12; // El Hierro y La Palma
-const TRUNK_PRICE = 18; // baúl los dos
+
 
 // Carga general
 const RATE_PER_KG = 0.15; // a partir de 400kg
@@ -118,17 +117,8 @@ const Calculadora = () => {
       }
     }
 
-    if (service === "baul") {
-      return {
-        total: TRUNK_PRICE,
-        breakdown: [
-          { label: "Baúl (los dos)", value: `${TRUNK_PRICE.toFixed(2)}€` },
-        ],
-        transit: "Hoy laborable → entrega mañana",
-      };
-    }
+    // Carga / mudanza
 
-    // Carga general / mudanza
     const w = parseFloat(weight) || 0;
     const v = parseFloat(volume) || 0;
     if (w <= 0 && v <= 0 && !outOfPallet) return null;
