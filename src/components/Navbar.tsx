@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Ship, Menu, X, PackageSearch } from "lucide-react";
+import { Ship, Menu, X, PackageSearch, Calculator } from "lucide-react";
 
 const navLinks = [
   { label: "Inicio", href: "/#" },
@@ -31,6 +31,13 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
+          <Link
+            to="/calculadora"
+            className="inline-flex items-center gap-1.5 text-primary-foreground/70 hover:text-secondary transition-colors text-sm font-medium"
+          >
+            <Calculator className="w-4 h-4" />
+            Presupuesto
+          </Link>
           <Link
             to="/seguimiento"
             className="inline-flex items-center gap-1.5 text-primary-foreground/70 hover:text-secondary transition-colors text-sm font-medium"
@@ -65,6 +72,14 @@ const Navbar = () => {
               {link.label}
             </a>
           ))}
+          <Link
+            to="/calculadora"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 text-primary-foreground/80 hover:text-secondary transition-colors font-medium"
+          >
+            <Calculator className="w-4 h-4" />
+            Presupuesto
+          </Link>
           <Link
             to="/seguimiento"
             onClick={() => setOpen(false)}
