@@ -81,13 +81,20 @@ const Calculadora = () => {
     const remoteKey = remote;
 
     if (service === "paqueteria") {
-      const n = Math.max(1, parseInt(packages) || 1);
+      const manualPackages = Math.max(1, parseInt(packages) || 1);
+      const w = parseFloat(weight) || 0;
+      // Hasta 20 kg = 1 bulto. Después, 1 bulto cada 20 kg (redondeo arriba).
+      const packagesByWeight = w > 0 ? Math.max(1, Math.ceil(w / 20)) : 0;
+      const n = Math.max(manualPackages, packagesByWeight);
       const total = RATE_PER_PACKAGE[remoteKey] * n;
+      const breakdown: { label: string; value: string }[] = [];
+      if (w > 0) {
+        breakdown.push({ label: `Peso ${w} kg (1 bulto/20 kg)`, value: `${packagesByWeight} bulto${packagesByWeight > 1 ? "s" : ""}` });
+      }
+      breakdown.push({ label: `${n} bulto${n > 1 ? "s" : ""} × ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` });
       return {
         total: Math.round(total * 100) / 100,
-        breakdown: [
-          { label: `${n} bulto${n > 1 ? "s" : ""} a ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` },
-        ],
+        breakdown,
         transit: "Hoy laborable → entrega mañana",
       };
     }
@@ -277,17 +284,34 @@ const Calculadora = () => {
 
               {/* Campos dinámicos según servicio */}
               {(service === "paqueteria" || (service === "flores" && flowerSize === "pequenas")) && (
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={packages}
-                    onChange={(e) => setPackages(e.target.value)}
-                    placeholder="Ej: 2"
-                    className="h-11"
-                  />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={packages}
+                      onChange={(e) => setPackages(e.target.value)}
+                      placeholder="Ej: 2"
+                      className="h-11"
+                    />
+                  </div>
+                  {service === "paqueteria" && (
+                    <div>
+                      <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="Ej: 25"
+                        className="h-11"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1">Hasta 20 kg = 1 bulto. Después se suma 1 bulto cada 20 kg.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
