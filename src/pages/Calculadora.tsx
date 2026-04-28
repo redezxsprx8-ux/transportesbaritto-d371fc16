@@ -277,7 +277,7 @@ const Calculadora = () => {
               </div>
 
               {/* Campos dinámicos según servicio */}
-              {(service === "paqueteria" || (service === "flores" && flowerSize === "pequenas")) && (
+              {service === "paqueteria" && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
@@ -291,44 +291,59 @@ const Calculadora = () => {
                       className="h-11"
                     />
                   </div>
-                  {service === "paqueteria" && (
-                    <div>
-                      <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
-                        placeholder="Ej: 25"
-                        className="h-11"
-                      />
-                      
-                    </div>
-                  )}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder="Ej: 25"
+                      className="h-11"
+                    />
+                  </div>
                 </div>
               )}
 
               {service === "flores" && (
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Tamaño</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["pequenas", "grandes"] as const).map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => setFlowerSize(size)}
-                        className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                          flowerSize === size
-                            ? "border-secondary bg-secondary/10 text-primary"
-                            : "border-border hover:border-secondary/50 text-foreground"
-                        }`}
-                      >
-                        {size === "pequenas" ? "Pequeñas (mín. 1 bulto)" : "Grandes (los dos)"}
-                      </button>
-                    ))}
+                <>
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Tipo</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { key: "normal", label: "Normal" },
+                        { key: "grande", label: "Grande" },
+                        { key: "baul", label: "Baúl" },
+                      ] as { key: FlowerSize; label: string }[]).map((opt) => (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setFlowerSize(opt.key)}
+                          className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                            flowerSize === opt.key
+                              ? "border-secondary bg-secondary/10 text-primary"
+                              : "border-border hover:border-secondary/50 text-foreground"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Nº de cajas de flores</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={flowerBoxes}
+                      onChange={(e) => setFlowerBoxes(e.target.value)}
+                      placeholder="Ej: 2"
+                      className="h-11"
+                    />
+                  </div>
+                </>
               )}
 
               {service === "carga" && (
@@ -345,7 +360,6 @@ const Calculadora = () => {
                         placeholder="Ej: 500"
                         className="h-11"
                       />
-                      <p className="text-[11px] text-muted-foreground mt-1">0,15€/kg a partir de 400 kg</p>
                     </div>
                     <div>
                       <Label className="text-sm font-semibold mb-2 block">Volumen (m³)</Label>
@@ -358,7 +372,6 @@ const Calculadora = () => {
                         placeholder="Ej: 1.5"
                         className="h-11"
                       />
-                      <p className="text-[11px] text-muted-foreground mt-1">55€/m³</p>
                     </div>
                   </div>
                   <label className="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/40 transition-colors">
@@ -370,7 +383,7 @@ const Calculadora = () => {
                     />
                     <div>
                       <div className="text-sm font-medium">Fuera de medida de palet</div>
-                      <div className="text-[11px] text-muted-foreground">Excede palet americano o europeo (+75€)</div>
+                      <div className="text-[11px] text-muted-foreground">Excede palet europeo (120×80 cm) o americano (120×100 cm)</div>
                     </div>
                   </label>
                 </>
