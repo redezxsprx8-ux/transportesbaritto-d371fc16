@@ -16,6 +16,7 @@ import {
 
 type Island = "tenerife" | "la-palma" | "el-hierro" | "la-gomera";
 type ServiceType = "paqueteria" | "carga" | "flores";
+type FlowerSize = "normal" | "grande" | "baul";
 
 const ISLANDS: { value: Island; label: string }[] = [
   { value: "tenerife", label: "Tenerife" },
@@ -27,33 +28,39 @@ const ISLANDS: { value: Island; label: string }[] = [
 const SERVICES: { value: ServiceType; label: string; icon: typeof Package; description: string }[] = [
   { value: "paqueteria", label: "Paquetería (por bulto)", icon: Package, description: "Envío estándar por número de bultos" },
   { value: "carga", label: "Cargo", icon: Truck, description: "Carga por kg, m³ o palet. Incluye mudanzas inter-islas" },
-  { value: "flores", label: "Flores", icon: Flower2, description: "Tarifa especial pequeñas o grandes" },
+  { value: "flores", label: "Flores", icon: Flower2, description: "Cajas de flores: normal, grande o baúl" },
 ];
 
-// Tarifas por bulto (paquetería estándar)
+// Tarifas internas (no mostrar al cliente)
 const RATE_PER_PACKAGE: Record<Exclude<Island, "tenerife" | "la-gomera">, number> = {
   "la-palma": 9.18,
   "el-hierro": 10.70,
 };
 
-// Flores grandes (precio por los dos, mínimo 1 bulto)
-const FLOWERS_LARGE_PRICE = 12; // El Hierro y La Palma
-
+// Flores: precio por caja según tamaño (LP / EH)
+const FLOWER_RATE: Record<FlowerSize, number> = {
+  normal: 9.18,   // equivalente a bulto estándar (se toma la menor tarifa)
+  grande: 12,     // grandes: 12€
+  baul: 18,       // baúl: 18€
+};
 
 // Carga general
 const RATE_PER_KG = 0.15; // a partir de 400kg
 const KG_THRESHOLD = 400;
-const RATE_PER_M3 = 55;
-const RATE_OUT_OF_PALLET = 75; // fuera de medida palet americano/europeo
+const RATE_PER_M3_NORMAL = 55;
+const RATE_PER_M3_OUT = 75; // fuera de medida de palet europeo/americano
 
 const Calculadora = () => {
   const [origin, setOrigin] = useState<Island | "">("");
   const [destination, setDestination] = useState<Island | "">("");
   const [service, setService] = useState<ServiceType>("paqueteria");
 
-  // Paquetería / flores / baúl
+  // Paquetería
   const [packages, setPackages] = useState("1");
-  const [flowerSize, setFlowerSize] = useState<"pequenas" | "grandes">("pequenas");
+
+  // Flores
+  const [flowerSize, setFlowerSize] = useState<FlowerSize>("normal");
+  const [flowerBoxes, setFlowerBoxes] = useState("1");
 
   // Carga general
   const [weight, setWeight] = useState("");
@@ -98,35 +105,25 @@ const Calculadora = () => {
     }
 
     if (service === "flores") {
-      if (flowerSize === "pequenas") {
-        // Pequeñas: mínimo 1 bulto, tarifa estándar por bulto
-        const n = Math.max(1, parseInt(packages) || 1);
-        const total = RATE_PER_PACKAGE[remoteKey] * n;
-        return {
-          total: Math.round(total * 100) / 100,
-          breakdown: [
-            { label: "Flores pequeñas (mín. 1 bulto)", value: `${n} bulto${n > 1 ? "s" : ""}` },
-            { label: `${n} × ${RATE_PER_PACKAGE[remoteKey].toFixed(2)}€`, value: `${total.toFixed(2)}€` },
-          ],
-          transit: "Hoy laborable → entrega mañana",
-        };
-      } else {
-        // Grandes: 12€ los dos (El Hierro y La Palma)
-        return {
-          total: FLOWERS_LARGE_PRICE,
-          breakdown: [
-            { label: "Flores grandes (los dos)", value: `${FLOWERS_LARGE_PRICE.toFixed(2)}€` },
-          ],
-          transit: "Hoy laborable → entrega mañana",
-        };
-      }
+      const n = Math.max(1, parseInt(flowerBoxes) || 1);
+      const rate = FLOWER_RATE[flowerSize];
+      const total = rate * n;
+      const sizeLabel =
+        flowerSize === "normal" ? "Normal" : flowerSize === "grande" ? "Grande" : "Baúl";
+      return {
+        total: Math.round(total * 100) / 100,
+        breakdown: [
+          { label: `Flores (${sizeLabel})`, value: `${n} caja${n > 1 ? "s" : ""}` },
+          { label: `${n} × ${rate.toFixed(2)}€`, value: `${total.toFixed(2)}€` },
+        ],
+        transit: "Hoy laborable → entrega mañana",
+      };
     }
 
     // Carga / mudanza
-
     const w = parseFloat(weight) || 0;
     const v = parseFloat(volume) || 0;
-    if (w <= 0 && v <= 0 && !outOfPallet) return null;
+    if (w <= 0 && v <= 0) return null;
 
     const lines: { label: string; value: string }[] = [];
     let total = 0;
@@ -134,20 +131,19 @@ const Calculadora = () => {
     if (w >= KG_THRESHOLD) {
       const kgCost = w * RATE_PER_KG;
       total += kgCost;
-      lines.push({ label: `${w} kg × ${RATE_PER_KG.toFixed(2)}€`, value: `${kgCost.toFixed(2)}€` });
+      lines.push({ label: `Peso ${w} kg`, value: `${kgCost.toFixed(2)}€` });
     } else if (w > 0) {
-      lines.push({ label: `Peso ${w} kg`, value: `< ${KG_THRESHOLD} kg (consultar)` });
+      lines.push({ label: `Peso ${w} kg`, value: `consultar` });
     }
 
     if (v > 0) {
-      const m3Cost = v * RATE_PER_M3;
+      const m3Rate = outOfPallet ? RATE_PER_M3_OUT : RATE_PER_M3_NORMAL;
+      const m3Cost = v * m3Rate;
       total += m3Cost;
-      lines.push({ label: `${v} m³ × ${RATE_PER_M3}€`, value: `${m3Cost.toFixed(2)}€` });
-    }
-
-    if (outOfPallet) {
-      total += RATE_OUT_OF_PALLET;
-      lines.push({ label: "Fuera de medida palet (americano/europeo)", value: `${RATE_OUT_OF_PALLET.toFixed(2)}€` });
+      lines.push({
+        label: outOfPallet ? `${v} m³ (fuera de medida)` : `${v} m³`,
+        value: `${m3Cost.toFixed(2)}€`,
+      });
     }
 
     if (total <= 0) return null;
@@ -177,8 +173,8 @@ const Calculadora = () => {
     if (service === "carga" && !isOnRequest) {
       const w = parseFloat(weight);
       const v = parseFloat(volume);
-      if ((!w || w <= 0) && (!v || v <= 0) && !outOfPallet) {
-        newErrors.weight = "Introduce peso, volumen o marca fuera de medida";
+      if ((!w || w <= 0) && (!v || v <= 0)) {
+        newErrors.weight = "Introduce peso o volumen";
       }
     }
 
@@ -281,7 +277,7 @@ const Calculadora = () => {
               </div>
 
               {/* Campos dinámicos según servicio */}
-              {(service === "paqueteria" || (service === "flores" && flowerSize === "pequenas")) && (
+              {service === "paqueteria" && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-semibold mb-2 block">Número de bultos</Label>
@@ -295,44 +291,59 @@ const Calculadora = () => {
                       className="h-11"
                     />
                   </div>
-                  {service === "paqueteria" && (
-                    <div>
-                      <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
-                        placeholder="Ej: 25"
-                        className="h-11"
-                      />
-                      
-                    </div>
-                  )}
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Peso total (kg)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder="Ej: 25"
+                      className="h-11"
+                    />
+                  </div>
                 </div>
               )}
 
               {service === "flores" && (
-                <div>
-                  <Label className="text-sm font-semibold mb-2 block">Tamaño</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["pequenas", "grandes"] as const).map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => setFlowerSize(size)}
-                        className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
-                          flowerSize === size
-                            ? "border-secondary bg-secondary/10 text-primary"
-                            : "border-border hover:border-secondary/50 text-foreground"
-                        }`}
-                      >
-                        {size === "pequenas" ? "Pequeñas (mín. 1 bulto)" : "Grandes (los dos)"}
-                      </button>
-                    ))}
+                <>
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Tipo</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { key: "normal", label: "Normal" },
+                        { key: "grande", label: "Grande" },
+                        { key: "baul", label: "Baúl" },
+                      ] as { key: FlowerSize; label: string }[]).map((opt) => (
+                        <button
+                          key={opt.key}
+                          type="button"
+                          onClick={() => setFlowerSize(opt.key)}
+                          className={`p-3 rounded-lg border-2 transition-all text-sm font-medium ${
+                            flowerSize === opt.key
+                              ? "border-secondary bg-secondary/10 text-primary"
+                              : "border-border hover:border-secondary/50 text-foreground"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                  <div>
+                    <Label className="text-sm font-semibold mb-2 block">Nº de cajas de flores</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={flowerBoxes}
+                      onChange={(e) => setFlowerBoxes(e.target.value)}
+                      placeholder="Ej: 2"
+                      className="h-11"
+                    />
+                  </div>
+                </>
               )}
 
               {service === "carga" && (
@@ -349,7 +360,6 @@ const Calculadora = () => {
                         placeholder="Ej: 500"
                         className="h-11"
                       />
-                      <p className="text-[11px] text-muted-foreground mt-1">0,15€/kg a partir de 400 kg</p>
                     </div>
                     <div>
                       <Label className="text-sm font-semibold mb-2 block">Volumen (m³)</Label>
@@ -362,7 +372,6 @@ const Calculadora = () => {
                         placeholder="Ej: 1.5"
                         className="h-11"
                       />
-                      <p className="text-[11px] text-muted-foreground mt-1">55€/m³</p>
                     </div>
                   </div>
                   <label className="flex items-center gap-3 p-3 rounded-lg border border-border cursor-pointer hover:bg-muted/40 transition-colors">
@@ -374,7 +383,7 @@ const Calculadora = () => {
                     />
                     <div>
                       <div className="text-sm font-medium">Fuera de medida de palet</div>
-                      <div className="text-[11px] text-muted-foreground">Excede palet americano o europeo (+75€)</div>
+                      <div className="text-[11px] text-muted-foreground">Excede palet europeo (120×80 cm) o americano (120×100 cm)</div>
                     </div>
                   </label>
                 </>

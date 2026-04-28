@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Ship, X, Info } from "lucide-react";
 
-const STORAGE_KEY = "baritto_welcome_seen_v1";
+const STORAGE_KEY = "baritto_welcome_seen_v2";
 
 const WelcomePopup = () => {
   const [open, setOpen] = useState(false);
@@ -76,10 +76,11 @@ const WelcomePopup = () => {
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-foreground leading-relaxed">
-                  Por el momento, realizamos envíos únicamente{" "}
-                  <span className="font-semibold text-primary">desde Tenerife</span> hacia{" "}
+                  Operamos envíos en ambos sentidos entre{" "}
+                  <span className="font-semibold text-primary">Tenerife</span>,{" "}
                   <span className="font-semibold text-primary">La Palma</span> y{" "}
-                  <span className="font-semibold text-primary">El Hierro</span>.
+                  <span className="font-semibold text-primary">El Hierro</span>.{" "}
+                  <span className="font-semibold text-primary">La Gomera</span> está disponible bajo encargo.
                 </p>
               </div>
 
