@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Search, Package, CheckCircle2, Truck, Ship, MapPin, Clock, Circle } from "lucide-react";
+import { Search, Package, CheckCircle2, Truck, Ship, MapPin, Clock, Circle, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,84 +11,91 @@ type Status = {
   title: string;
   location: string;
   date: string;
-  completed: boolean;
 };
 
-const DEMO_CODE = "BAR-EH-2026-7842";
-
-const demoStatuses: Status[] = [
+const baseStatuses: Status[] = [
   {
     icon: Package,
     title: "Escaneo en origen",
     location: "Delegación El Hierro · Valverde",
     date: "24 abr 2026 · 09:14",
-    completed: true,
   },
   {
     icon: CheckCircle2,
     title: "Mercancía preparada",
     location: "Centro logístico El Hierro",
     date: "24 abr 2026 · 11:42",
-    completed: true,
   },
   {
     icon: Truck,
     title: "Salida del envío",
     location: "Puerto de La Estaca",
     date: "24 abr 2026 · 16:30",
-    completed: true,
   },
   {
     icon: Ship,
     title: "En tránsito marítimo",
     location: "El Hierro → Tenerife",
     date: "25 abr 2026 · 02:10",
-    completed: true,
   },
   {
     icon: MapPin,
     title: "Recepción en destino",
     location: "Puerto de Santa Cruz de Tenerife",
     date: "25 abr 2026 · 08:45",
-    completed: true,
   },
   {
     icon: Truck,
     title: "En reparto",
     location: "Delegación Tenerife · Granadilla",
-    date: "Estimado: 25 abr 2026 · 14:00",
-    completed: false,
+    date: "25 abr 2026 · 14:00",
   },
   {
     icon: CheckCircle2,
     title: "Entregado",
-    location: "Pendiente",
-    date: "—",
-    completed: false,
+    location: "Cliente final · Tenerife",
+    date: "25 abr 2026 · 16:20",
   },
 ];
 
 const Tracking = () => {
   const [code, setCode] = useState("");
-  const [result, setResult] = useState<Status[] | null>(null);
+  const [trackingCode, setTrackingCode] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) {
       setError("Introduce un código de seguimiento");
-      setResult(null);
       return;
     }
-    if (trimmed === DEMO_CODE) {
-      setError("");
-      setResult(demoStatuses);
-    } else {
-      setError(`No se ha encontrado el código "${trimmed}". Prueba con: ${DEMO_CODE}`);
-      setResult(null);
-    }
+    setError("");
+    setTrackingCode(trimmed);
+    setCurrentStep(1);
+
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCurrentStep((prev) => {
+        if (prev >= baseStatuses.length) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 2500);
   };
+
+  const isComplete = currentStep >= baseStatuses.length;
+  const activeIndex = Math.min(currentStep - 1, baseStatuses.length - 1);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -126,7 +133,7 @@ const Tracking = () => {
               <Input
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="Ej: BAR-EH-2026-7842"
+                placeholder="Introduce tu código"
                 className="flex-1 h-12 text-base"
               />
               <Button type="submit" size="lg" className="h-12 bg-secondary text-secondary-foreground hover:brightness-110">
@@ -134,13 +141,10 @@ const Tracking = () => {
                 Buscar
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Código de prueba: <span className="font-mono font-semibold text-primary">{DEMO_CODE}</span>
-            </p>
             {error && <p className="text-sm text-destructive mt-3">{error}</p>}
           </motion.form>
 
-          {result && (
+          {trackingCode && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -152,7 +156,7 @@ const Tracking = () => {
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
                     Código
                   </p>
-                  <p className="font-mono font-bold text-lg text-primary">{DEMO_CODE}</p>
+                  <p className="font-mono font-bold text-lg text-primary">{trackingCode}</p>
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
@@ -165,50 +169,65 @@ const Tracking = () => {
                     Estado
                   </p>
                   <span className="inline-flex items-center gap-2 bg-secondary/15 text-secondary-foreground px-3 py-1 rounded-full text-sm font-semibold">
-                    <Clock className="w-3.5 h-3.5" />
-                    En tránsito
+                    {isComplete ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Entregado
+                      </>
+                    ) : (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        {baseStatuses[activeIndex]?.title ?? "Procesando"}
+                      </>
+                    )}
                   </span>
                 </div>
               </div>
 
               <ol className="relative">
-                {result.map((step, i) => {
+                {baseStatuses.map((step, i) => {
                   const Icon = step.icon;
-                  const isLast = i === result.length - 1;
+                  const isLast = i === baseStatuses.length - 1;
+                  const completed = i < currentStep;
+                  const isActive = i === currentStep - 1 && !isComplete;
                   return (
                     <motion.li
                       key={i}
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: i * 0.08 }}
+                      transition={{ duration: 0.5, delay: i * 0.05 }}
                       className="relative pl-14 pb-8"
                     >
                       {!isLast && (
                         <span
-                          className={`absolute left-[22px] top-11 bottom-0 w-px ${
-                            step.completed ? "bg-secondary" : "bg-border"
+                          className={`absolute left-[22px] top-11 bottom-0 w-px transition-colors duration-500 ${
+                            completed ? "bg-secondary" : "bg-border"
                           }`}
                         />
                       )}
-                      <span
-                        className={`absolute left-0 top-0 w-11 h-11 rounded-full flex items-center justify-center ${
-                          step.completed
+                      <motion.span
+                        animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                        transition={isActive ? { duration: 1.5, repeat: Infinity } : { duration: 0.3 }}
+                        className={`absolute left-0 top-0 w-11 h-11 rounded-full flex items-center justify-center transition-colors duration-500 ${
+                          completed
                             ? "bg-secondary text-secondary-foreground"
                             : "bg-muted text-muted-foreground"
-                        }`}
+                        } ${isActive ? "ring-4 ring-secondary/30" : ""}`}
                       >
-                        {step.completed ? <Icon className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                      </span>
+                        {completed ? <Icon className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                      </motion.span>
                       <div>
                         <h3
-                          className={`font-heading font-semibold text-base mb-1 ${
-                            step.completed ? "text-primary" : "text-muted-foreground"
+                          className={`font-heading font-semibold text-base mb-1 transition-colors duration-500 ${
+                            completed ? "text-primary" : "text-muted-foreground"
                           }`}
                         >
                           {step.title}
                         </h3>
                         <p className="text-sm text-foreground/80">{step.location}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{step.date}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {completed ? step.date : "Pendiente"}
+                        </p>
                       </div>
                     </motion.li>
                   );
