@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Calculator, Package, Truck, Flower2, Archive, Info, ArrowRight, Phone } from "lucide-react";
+import { Calculator, Package, Truck, Flower2, Info, ArrowRight, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
